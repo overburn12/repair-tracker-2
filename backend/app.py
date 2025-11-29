@@ -13,6 +13,9 @@ import json
 from db_connector import get_session, init_db
 from websocket_manager import websocket_manager
 from repair_service import RepairService
+from events import event_bus
+import websocket_handlers
+import request_handlers
 
 app = FastAPI(title="Repair Tracker 2")
 
@@ -91,18 +94,30 @@ async def get_order(order_id: int, session: Session = Depends(get_session)):
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """
-    WebSocket endpoint for real-time updates.
+    WebSocket endpoint for real-time bidirectional updates.
 
-    Expected message format from client:
-    {
-        "type": "subscribe",
-        "channels": ["main", "order:123"]
-    }
+    On connect: Sends websocket_id to client
 
-    Server sends initial data after subscription, then sends updates
-    as they occur via the event bus.
+    Client->Server messages:
+    - subscribe: {"type": "subscribe", "channels": [...]}
+    - update: {"channel": "...", "type": "update", "data": [...]}
+    - delete: {"channel": "...", "type": "delete", "data": [...keys...]}
+    - ping: {"type": "ping"}
+
+    Server->Client: Formatted messages from event bus
     """
-    await websocket_manager.connect(websocket)
+    # Connect and get websocket_id
+    websocket_id = await websocket_manager.connect(websocket)
+
+    # Send websocket_id to client
+    await websocket.send_json({
+        "type": "connected",
+        "websocket_id": websocket_id
+    })
+
+    # Get database session for this connection
+    session_gen = get_session()
+    session = next(session_gen)
 
     try:
         while True:
@@ -113,20 +128,59 @@ async def websocket_endpoint(websocket: WebSocket):
             message_type = message.get("type")
 
             if message_type == "subscribe":
+                # Handle channel subscription
                 channels = message.get("channels", [])
                 await websocket_manager.subscribe_to_channels(
                     websocket,
                     channels
                 )
 
-                # Send initial data for subscribed channels
-                # This would typically fetch current state and send it
-                # Placeholder for now
-                await websocket.send_json({
-                    "type": "subscribed",
-                    "channels": channels,
-                    "message": "Subscribed successfully"
-                })
+                # Send initial data for each channel
+                for channel in channels:
+                    initial_data = (
+                        await websocket_handlers.get_initial_data_for_channel(
+                            channel,
+                            session
+                        )
+                    )
+                    if initial_data:
+                        await websocket.send_json(initial_data)
+
+            elif message_type == "update":
+                # Handle update from frontend
+                error = await request_handlers.handle_update_request(
+                    message,
+                    websocket_id,
+                    session
+                )
+                if error:
+                    # Send error message via __messages__ channel
+                    error_msg = websocket_handlers.format_error_message(
+                        websocket_id,
+                        error
+                    )
+                    await event_bus.publish(
+                        event_bus.get_messages_channel(),
+                        error_msg
+                    )
+
+            elif message_type == "delete":
+                # Handle delete from frontend
+                error = await request_handlers.handle_delete_request(
+                    message,
+                    websocket_id,
+                    session
+                )
+                if error:
+                    # Send error message via __messages__ channel
+                    error_msg = websocket_handlers.format_error_message(
+                        websocket_id,
+                        error
+                    )
+                    await event_bus.publish(
+                        event_bus.get_messages_channel(),
+                        error_msg
+                    )
 
             elif message_type == "ping":
                 # Keepalive ping/pong
@@ -134,16 +188,23 @@ async def websocket_endpoint(websocket: WebSocket):
 
             else:
                 # Unknown message type
-                await websocket.send_json({
-                    "type": "error",
-                    "message": f"Unknown message type: {message_type}"
-                })
+                error_msg = websocket_handlers.format_error_message(
+                    websocket_id,
+                    f"Unknown message type: {message_type}"
+                )
+                await websocket.send_json(error_msg)
 
     except WebSocketDisconnect:
         await websocket_manager.disconnect(websocket)
     except Exception as e:
         print(f"WebSocket error: {e}")
         await websocket_manager.disconnect(websocket)
+    finally:
+        # Clean up session
+        try:
+            session.close()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

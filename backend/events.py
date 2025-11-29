@@ -2,11 +2,13 @@
 Event Bus: In-memory Pub/Sub System
 
 Custom event bus to handle publish/subscribe messaging without Redis.
-Channels are based on repair order IDs and a main channel for metadata.
+Supports multiple channel types for different data flows.
 
 Channels:
-- 'main': All repair order metadata (for main orders display)
-- 'order:{order_id}': Updates for specific repair order and its units
+- 'main:lists': Assignees, statuses, and unit models
+- 'main:orders': All repair order metadata
+- 'order:RO-##': Updates for specific repair order and its units (JIRA key)
+- '__messages__': Private channel for error messages (websocket_id routing)
 """
 
 from typing import Dict, Set, Callable, Any
@@ -82,9 +84,39 @@ class EventBus:
             order_id: Repair order ID
 
         Returns:
+            Channel name string (e.g., "order:RO-123")
+        """
+        return f"order:RO-{order_id}"
+
+    @staticmethod
+    def get_main_lists_channel() -> str:
+        """
+        Get the channel name for main lists data.
+
+        Returns:
             Channel name string
         """
-        return f"order:{order_id}"
+        return "main:lists"
+
+    @staticmethod
+    def get_main_orders_channel() -> str:
+        """
+        Get the channel name for main orders data.
+
+        Returns:
+            Channel name string
+        """
+        return "main:orders"
+
+    @staticmethod
+    def get_messages_channel() -> str:
+        """
+        Get the private messages channel for error routing.
+
+        Returns:
+            Channel name string
+        """
+        return "__messages__"
 
 
 # Global event bus instance

@@ -17,6 +17,7 @@ from repo.repair_order_repo import RepairOrderRepository
 from repo.repair_unit_repo import RepairUnitRepository
 from events import event_bus
 from db_models import UnitType
+import websocket_handlers
 
 
 class RepairService:
@@ -74,7 +75,7 @@ class RepairService:
             return None
         return self._serialize_order_with_units(order)
 
-    def create_repair_order(
+    async def create_repair_order(
         self,
         name: str,
         status_id: int,
@@ -84,7 +85,7 @@ class RepairService:
         """
         Create a new repair order.
 
-        Publishes to 'main' channel after creation.
+        Publishes to 'main:orders' channel after creation.
         """
         order = self.order_repo.create(
             name=name,
@@ -94,15 +95,21 @@ class RepairService:
         )
         self.session.commit()
 
-        # Publish to main channel
+        # Publish to main:orders channel
         serialized = self._serialize_order(order)
-        # Note: publish is async, needs to be awaited in async context
-        # This is a placeholder for the pattern
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_orders_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_orders_channel(),
+            message
+        )
 
         return serialized
 
     # Repair unit methods
-    def create_repair_unit(
+    async def create_repair_unit(
         self,
         repair_order_id: int,
         unit_type: UnitType,
@@ -143,10 +150,17 @@ class RepairService:
         self.session.commit()
 
         # Publish to order channel
-        # Placeholder for async publish
-        return self._serialize_unit(unit)
+        serialized = self._serialize_unit(unit)
+        channel = event_bus.get_channel_for_order(repair_order_id)
+        message = websocket_handlers.format_update_message(
+            channel,
+            [serialized]
+        )
+        await event_bus.publish(channel, message)
 
-    def add_status_event(
+        return serialized
+
+    async def add_status_event(
         self,
         unit_id: int,
         status_id: int,
@@ -187,8 +201,15 @@ class RepairService:
         self.session.commit()
 
         # Publish to order channel
-        # Placeholder for async publish
-        return self._serialize_unit(unit)
+        serialized = self._serialize_unit(unit)
+        channel = event_bus.get_channel_for_order(unit.repair_order_id)
+        message = websocket_handlers.format_update_message(
+            channel,
+            [serialized]
+        )
+        await event_bus.publish(channel, message)
+
+        return serialized
 
     # Event creation helpers
     def _create_status_event(
