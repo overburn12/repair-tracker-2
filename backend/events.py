@@ -5,7 +5,9 @@ Custom event bus to handle publish/subscribe messaging without Redis.
 Supports multiple channel types for different data flows.
 
 Channels:
-- 'main:lists': Assignees, statuses, and unit models
+- 'main:assignee': Assignee table data
+- 'main:status': Status table data
+- 'main:unitmodel': Unit model table data
 - 'main:orders': All repair order metadata
 - 'order:RO-##': Updates for specific repair order and its units (JIRA key)
 - '__messages__': Private channel for error messages (websocket_id routing)
@@ -89,14 +91,34 @@ class EventBus:
         return f"order:RO-{order_id}"
 
     @staticmethod
-    def get_main_lists_channel() -> str:
+    def get_main_assignee_channel() -> str:
         """
-        Get the channel name for main lists data.
+        Get the channel name for assignee data.
 
         Returns:
             Channel name string
         """
-        return "main:lists"
+        return "main:assignee"
+
+    @staticmethod
+    def get_main_status_channel() -> str:
+        """
+        Get the channel name for status data.
+
+        Returns:
+            Channel name string
+        """
+        return "main:status"
+
+    @staticmethod
+    def get_main_unitmodel_channel() -> str:
+        """
+        Get the channel name for unit model data.
+
+        Returns:
+            Channel name string
+        """
+        return "main:unitmodel"
 
     @staticmethod
     def get_main_orders_channel() -> str:

@@ -47,17 +47,279 @@ class RepairService:
         assignees = self.assignee_repo.get_active()
         return [self._serialize_assignee(a) for a in assignees]
 
+    async def create_assignee(
+        self,
+        name: str,
+        is_active: int = 1
+    ) -> Dict[str, Any]:
+        """
+        Create a new assignee.
+
+        Publishes to main:assignee channel after creation.
+        """
+        assignee = self.assignee_repo.create(name=name, is_active=is_active)
+        self.session.commit()
+
+        # Publish to main:assignee channel
+        serialized = self._serialize_assignee(assignee)
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_assignee_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_assignee_channel(),
+            message
+        )
+
+        return serialized
+
+    async def update_assignee(
+        self,
+        assignee_id: int,
+        name: Optional[str] = None,
+        is_active: Optional[int] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Update an existing assignee.
+
+        Publishes to main:assignee channel after update.
+        """
+        assignee = self.assignee_repo.update(
+            assignee_id=assignee_id,
+            name=name,
+            is_active=is_active
+        )
+        if not assignee:
+            return None
+
+        self.session.commit()
+
+        # Publish to main:assignee channel
+        serialized = self._serialize_assignee(assignee)
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_assignee_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_assignee_channel(),
+            message
+        )
+
+        return serialized
+
+    async def delete_assignee(self, assignee_id: int) -> bool:
+        """
+        Delete an assignee.
+
+        Publishes to main:assignee channel after deletion.
+        """
+        success = self.assignee_repo.delete(assignee_id)
+        if not success:
+            return False
+
+        self.session.commit()
+
+        # Publish to main:assignee channel
+        message = websocket_handlers.format_delete_message(
+            event_bus.get_main_assignee_channel(),
+            [f"AS-{assignee_id}"]
+        )
+        await event_bus.publish(
+            event_bus.get_main_assignee_channel(),
+            message
+        )
+
+        return True
+
     # Status methods
     def get_all_statuses(self) -> List[Dict[str, Any]]:
         """Get all statuses."""
         statuses = self.status_repo.get_all()
         return [self._serialize_status(s) for s in statuses]
 
+    async def create_status(
+        self,
+        status: str,
+        color: str = '#bb86fc',
+        is_ending_status: int = 0,
+        can_use_for_order: int = 1,
+        can_use_for_machine: int = 1,
+        can_use_for_hashboard: int = 1
+    ) -> Dict[str, Any]:
+        """
+        Create a new status.
+
+        Publishes to main:status channel after creation.
+        """
+        status_obj = self.status_repo.create(
+            status=status,
+            color=color,
+            is_ending_status=is_ending_status,
+            can_use_for_order=can_use_for_order,
+            can_use_for_machine=can_use_for_machine,
+            can_use_for_hashboard=can_use_for_hashboard
+        )
+        self.session.commit()
+
+        # Publish to main:status channel
+        serialized = self._serialize_status(status_obj)
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_status_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_status_channel(),
+            message
+        )
+
+        return serialized
+
+    async def update_status(
+        self,
+        status_id: int,
+        status: Optional[str] = None,
+        color: Optional[str] = None,
+        is_ending_status: Optional[int] = None,
+        can_use_for_order: Optional[int] = None,
+        can_use_for_machine: Optional[int] = None,
+        can_use_for_hashboard: Optional[int] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Update an existing status.
+
+        Publishes to main:status channel after update.
+        """
+        status_obj = self.status_repo.update(
+            status_id=status_id,
+            status=status,
+            color=color,
+            is_ending_status=is_ending_status,
+            can_use_for_order=can_use_for_order,
+            can_use_for_machine=can_use_for_machine,
+            can_use_for_hashboard=can_use_for_hashboard
+        )
+        if not status_obj:
+            return None
+
+        self.session.commit()
+
+        # Publish to main:status channel
+        serialized = self._serialize_status(status_obj)
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_status_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_status_channel(),
+            message
+        )
+
+        return serialized
+
+    async def delete_status(self, status_id: int) -> bool:
+        """
+        Delete a status.
+
+        Publishes to main:status channel after deletion.
+        """
+        success = self.status_repo.delete(status_id)
+        if not success:
+            return False
+
+        self.session.commit()
+
+        # Publish to main:status channel
+        message = websocket_handlers.format_delete_message(
+            event_bus.get_main_status_channel(),
+            [f"ST-{status_id}"]
+        )
+        await event_bus.publish(
+            event_bus.get_main_status_channel(),
+            message
+        )
+
+        return True
+
     # Unit model methods
     def get_all_unit_models(self) -> List[Dict[str, Any]]:
         """Get all unit models."""
         models = self.unit_model_repo.get_all()
         return [self._serialize_unit_model(m) for m in models]
+
+    async def create_unit_model(self, name: str) -> Dict[str, Any]:
+        """
+        Create a new unit model.
+
+        Publishes to main:unitmodel channel after creation.
+        """
+        model = self.unit_model_repo.create(name=name)
+        self.session.commit()
+
+        # Publish to main:unitmodel channel
+        serialized = self._serialize_unit_model(model)
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_unitmodel_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_unitmodel_channel(),
+            message
+        )
+
+        return serialized
+
+    async def update_unit_model(
+        self,
+        model_id: int,
+        name: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Update an existing unit model.
+
+        Publishes to main:unitmodel channel after update.
+        """
+        model = self.unit_model_repo.update(model_id=model_id, name=name)
+        if not model:
+            return None
+
+        self.session.commit()
+
+        # Publish to main:unitmodel channel
+        serialized = self._serialize_unit_model(model)
+        message = websocket_handlers.format_update_message(
+            event_bus.get_main_unitmodel_channel(),
+            [serialized]
+        )
+        await event_bus.publish(
+            event_bus.get_main_unitmodel_channel(),
+            message
+        )
+
+        return serialized
+
+    async def delete_unit_model(self, model_id: int) -> bool:
+        """
+        Delete a unit model.
+
+        Publishes to main:unitmodel channel after deletion.
+        """
+        success = self.unit_model_repo.delete(model_id)
+        if not success:
+            return False
+
+        self.session.commit()
+
+        # Publish to main:unitmodel channel
+        message = websocket_handlers.format_delete_message(
+            event_bus.get_main_unitmodel_channel(),
+            [f"UM-{model_id}"]
+        )
+        await event_bus.publish(
+            event_bus.get_main_unitmodel_channel(),
+            message
+        )
+
+        return True
 
     # Repair order methods
     def get_all_orders(self) -> List[Dict[str, Any]]:

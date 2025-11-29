@@ -28,8 +28,14 @@ async def get_initial_data_for_channel(
     """
     service = RepairService(session)
 
-    if channel == event_bus.get_main_lists_channel():
-        return await _get_main_lists_data(service)
+    if channel == event_bus.get_main_assignee_channel():
+        return await _get_main_assignee_data(service)
+
+    elif channel == event_bus.get_main_status_channel():
+        return await _get_main_status_data(service)
+
+    elif channel == event_bus.get_main_unitmodel_channel():
+        return await _get_main_unitmodel_data(service)
 
     elif channel == event_bus.get_main_orders_channel():
         return await _get_main_orders_data(service)
@@ -45,9 +51,9 @@ async def get_initial_data_for_channel(
     return None
 
 
-async def _get_main_lists_data(service: RepairService) -> Dict[str, Any]:
+async def _get_main_assignee_data(service: RepairService) -> Dict[str, Any]:
     """
-    Get main lists data (assignees, statuses, unit models).
+    Get main assignee data.
 
     Args:
         service: RepairService instance
@@ -56,19 +62,49 @@ async def _get_main_lists_data(service: RepairService) -> Dict[str, Any]:
         Formatted message dict
     """
     assignees = service.get_all_assignees()
-    statuses = service.get_all_statuses()
-    models = service.get_all_unit_models()
-
-    # Combine all lists into data array
-    data = []
-    data.extend(assignees)
-    data.extend(statuses)
-    data.extend(models)
 
     return {
-        "channel": event_bus.get_main_lists_channel(),
+        "channel": event_bus.get_main_assignee_channel(),
         "type": "update",
-        "data": data
+        "data": assignees
+    }
+
+
+async def _get_main_status_data(service: RepairService) -> Dict[str, Any]:
+    """
+    Get main status data.
+
+    Args:
+        service: RepairService instance
+
+    Returns:
+        Formatted message dict
+    """
+    statuses = service.get_all_statuses()
+
+    return {
+        "channel": event_bus.get_main_status_channel(),
+        "type": "update",
+        "data": statuses
+    }
+
+
+async def _get_main_unitmodel_data(service: RepairService) -> Dict[str, Any]:
+    """
+    Get main unit model data.
+
+    Args:
+        service: RepairService instance
+
+    Returns:
+        Formatted message dict
+    """
+    models = service.get_all_unit_models()
+
+    return {
+        "channel": event_bus.get_main_unitmodel_channel(),
+        "type": "update",
+        "data": models
     }
 
 
