@@ -9,6 +9,7 @@ class WebSocketService {
     this.websocketId = null;
     this.connected = false;
     this.subscribers = new Map(); // channel -> Set of callbacks
+    this.pendingSubscriptions = []; // Queue for subscriptions before connection is ready
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 10;
     this.reconnectDelay = 1000;
@@ -91,6 +92,15 @@ class WebSocketService {
       if (message.type === 'connected') {
         this.websocketId = message.websocket_id;
         console.log('WebSocket ID:', this.websocketId);
+
+        // Process any pending subscriptions
+        if (this.pendingSubscriptions.length > 0) {
+          console.log('Processing', this.pendingSubscriptions.length, 'pending subscriptions');
+          this.pendingSubscriptions.forEach(channels => {
+            this.subscribeToChannels(channels);
+          });
+          this.pendingSubscriptions = [];
+        }
         return;
       }
 
@@ -118,6 +128,13 @@ class WebSocketService {
    */
   subscribeToChannels(channels) {
     const channelArray = Array.isArray(channels) ? channels : [channels];
+
+    // If we haven't received the connected message yet, queue the subscription
+    if (!this.websocketId) {
+      console.log('Queueing subscription for', channelArray);
+      this.pendingSubscriptions.push(channelArray);
+      return;
+    }
 
     const message = {
       type: 'subscribe',
@@ -197,10 +214,10 @@ class WebSocketService {
    * @param {object} message - Message object to send
    */
   send(message) {
-    if (this.ws && this.connected) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket not connected');
+      console.error('WebSocket not ready to send. ReadyState:', this.ws?.readyState);
     }
   }
 

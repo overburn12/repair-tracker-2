@@ -72,6 +72,38 @@ async def get_unit_models(session: Session = Depends(get_session)):
     return service.get_all_unit_models()
 
 
+@app.get("/api/get_holidays")
+async def get_holidays():
+    """Get list of federal holidays for 2025-2026."""
+    holidays = [
+        # 2025
+        "2025-01-01",  # New Year's Day
+        "2025-01-20",  # Martin Luther King Jr. Day
+        "2025-02-17",  # Presidents' Day
+        "2025-05-26",  # Memorial Day
+        "2025-06-19",  # Juneteenth
+        "2025-07-04",  # Independence Day
+        "2025-09-01",  # Labor Day
+        "2025-10-13",  # Columbus Day
+        "2025-11-11",  # Veterans Day
+        "2025-11-27",  # Thanksgiving
+        "2025-12-25",  # Christmas
+        # 2026
+        "2026-01-01",  # New Year's Day
+        "2026-01-19",  # Martin Luther King Jr. Day
+        "2026-02-16",  # Presidents' Day
+        "2026-05-25",  # Memorial Day
+        "2026-06-19",  # Juneteenth
+        "2026-07-03",  # Independence Day (observed)
+        "2026-09-07",  # Labor Day
+        "2026-10-12",  # Columbus Day
+        "2026-11-11",  # Veterans Day
+        "2026-11-26",  # Thanksgiving
+        "2026-12-25",  # Christmas
+    ]
+    return {"holidays": holidays}
+
+
 @app.get("/api/orders")
 async def get_orders(session: Session = Depends(get_session)):
     """Get all repair orders (metadata)."""
