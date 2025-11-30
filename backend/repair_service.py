@@ -17,7 +17,7 @@ from repo.repair_order_repo import RepairOrderRepository
 from repo.repair_unit_repo import RepairUnitRepository
 from events import event_bus
 from db_models import UnitType
-import websocket_handlers
+import message_formatters
 
 
 class RepairService:
@@ -62,7 +62,7 @@ class RepairService:
 
         # Publish to main:assignee channel
         serialized = self._serialize_assignee(assignee)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_assignee_channel(),
             [serialized]
         )
@@ -96,7 +96,7 @@ class RepairService:
 
         # Publish to main:assignee channel
         serialized = self._serialize_assignee(assignee)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_assignee_channel(),
             [serialized]
         )
@@ -120,7 +120,7 @@ class RepairService:
         self.session.commit()
 
         # Publish to main:assignee channel
-        message = websocket_handlers.format_delete_message(
+        message = message_formatters.format_delete_message(
             event_bus.get_main_assignee_channel(),
             [f"AS-{assignee_id}"]
         )
@@ -163,7 +163,7 @@ class RepairService:
 
         # Publish to main:status channel
         serialized = self._serialize_status(status_obj)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_status_channel(),
             [serialized]
         )
@@ -205,7 +205,7 @@ class RepairService:
 
         # Publish to main:status channel
         serialized = self._serialize_status(status_obj)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_status_channel(),
             [serialized]
         )
@@ -229,7 +229,7 @@ class RepairService:
         self.session.commit()
 
         # Publish to main:status channel
-        message = websocket_handlers.format_delete_message(
+        message = message_formatters.format_delete_message(
             event_bus.get_main_status_channel(),
             [f"ST-{status_id}"]
         )
@@ -257,7 +257,7 @@ class RepairService:
 
         # Publish to main:unitmodel channel
         serialized = self._serialize_unit_model(model)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_unitmodel_channel(),
             [serialized]
         )
@@ -286,7 +286,7 @@ class RepairService:
 
         # Publish to main:unitmodel channel
         serialized = self._serialize_unit_model(model)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_unitmodel_channel(),
             [serialized]
         )
@@ -310,7 +310,7 @@ class RepairService:
         self.session.commit()
 
         # Publish to main:unitmodel channel
-        message = websocket_handlers.format_delete_message(
+        message = message_formatters.format_delete_message(
             event_bus.get_main_unitmodel_channel(),
             [f"UM-{model_id}"]
         )
@@ -359,7 +359,7 @@ class RepairService:
 
         # Publish to main:orders channel
         serialized = self._serialize_order(order)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_orders_channel(),
             [serialized]
         )
@@ -406,7 +406,7 @@ class RepairService:
 
         # Publish to main:orders channel
         serialized = self._serialize_order(order)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             event_bus.get_main_orders_channel(),
             [serialized]
         )
@@ -442,7 +442,7 @@ class RepairService:
         self.session.commit()
 
         # Publish delete to main:orders channel
-        message = websocket_handlers.format_delete_message(
+        message = message_formatters.format_delete_message(
             event_bus.get_main_orders_channel(),
             [f"RO-{order_id}"]
         )
@@ -453,7 +453,7 @@ class RepairService:
 
         # Also need to publish deletes for all units
         for unit in order.units:
-            unit_message = websocket_handlers.format_delete_message(
+            unit_message = message_formatters.format_delete_message(
                 event_bus.get_channel_for_order(order_id),
                 [f"RU-{unit.id}"]
             )
@@ -511,7 +511,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -550,7 +550,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -583,7 +583,7 @@ class RepairService:
 
         # Publish delete to order channel
         channel = event_bus.get_channel_for_order(repair_order_id)
-        message = websocket_handlers.format_delete_message(
+        message = message_formatters.format_delete_message(
             channel,
             [f"RU-{unit_id}"]
         )
@@ -637,7 +637,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -679,7 +679,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -721,7 +721,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -763,7 +763,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -805,7 +805,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -847,7 +847,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -889,7 +889,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -1006,7 +1006,7 @@ class RepairService:
         # Publish to order channel
         serialized = self._serialize_unit(unit)
         channel = event_bus.get_channel_for_order(unit.repair_order_id)
-        message = websocket_handlers.format_update_message(
+        message = message_formatters.format_update_message(
             channel,
             [serialized]
         )
@@ -1087,7 +1087,7 @@ class RepairService:
         if order:
             # Publish updated order
             serialized = self._serialize_order(order)
-            message = websocket_handlers.format_update_message(
+            message = message_formatters.format_update_message(
                 event_bus.get_main_orders_channel(),
                 [serialized]
             )

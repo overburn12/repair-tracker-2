@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 
 from repair_service import RepairService
 from events import event_bus
-import websocket_handlers
 
 
 async def handle_update_request(
