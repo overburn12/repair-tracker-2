@@ -1,0 +1,278 @@
+/* Theme variables - Dark theme (default) */
+:root {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2a2a2a;
+  --bg-navbar: #2d2d2d;
+  --bg-input: #1a1a1a;
+  --bg-hover: rgba(255, 255, 255, 0.15);
+  --text-primary: #e0e0e0;
+  --text-secondary: #808080;
+  --text-tertiary: #888;
+  --border-color: #404040;
+  --accent-color: #bb86fc;
+  --success-color: #4caf50;
+  --error-color: #ff6b6b;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --dropdown-bg: #2a2a2a;
+  --dropdown-item-hover: #353535;
+  --dropdown-item-border: #353535;
+  --dropdown-more-bg: #252525;
+  --dropdown-more-hover: #303030;
+  --scrollbar-track: #1a1a1a;
+  --scrollbar-thumb: #404040;
+  --scrollbar-thumb-hover: #505050;
+  --navbar-text: #e0e0e0;
+  --table-bg: #2a2a2a;
+  --table-header-bg: #353535;
+  --table-row-hover: #333333;
+  --table-row-machine: #2d2d2d;
+  --button-bg: #bb86fc;
+  --button-hover-bg: #9965d4;
+  --button-text: #1a1a1a;
+  --warning-color: #ffa500;
+  --warning-bg: #3a3a1a;
+  --warning-border: #8a8a2a;
+  --delete-color: #ff6b6b;
+  --delete-hover: #ff4444;
+  --edit-color: #bb86fc;
+  --edit-hover: #9965d4;
+  --progress-bar-border: #ccc;
+  --comment-event-color: #cf6679;
+  --repair-event-color: #03dac6;
+  --status-event-color: #bb86fc;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-primary: rgb(240, 240, 240);
+  --bg-secondary: #f9f9f9;
+  --bg-navbar: #6B4F3A;
+  --bg-input: #ffffff;
+  --bg-hover: rgba(255, 255, 255, 0.1);
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --text-tertiary: #888888;
+  --border-color: #ddd;
+  --accent-color: #6B4F3A;
+  --success-color: #2e7d32;
+  --error-color: #d32f2f;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --dropdown-bg: #f9f9f9;
+  --dropdown-item-hover: #eeeeee;
+  --dropdown-item-border: #ddd;
+  --dropdown-more-bg: #f5f5f5;
+  --dropdown-more-hover: #eeeeee;
+  --scrollbar-track: rgb(240, 240, 240);
+  --scrollbar-thumb: #c0c0c0;
+  --scrollbar-thumb-hover: #a0a0a0;
+  --navbar-text: #ffffff;
+  --table-bg: #f9f9f9;
+  --table-header-bg: #e8e8e8;
+  --table-row-hover: #eeeeee;
+  --table-row-machine: #f5f5f5;
+  --button-bg: #6B4F3A;
+  --button-hover-bg: #5a3f2a;
+  --button-text: #ffffff;
+  --warning-color: #f57c00;
+  --warning-bg: #fff8e1;
+  --warning-border: #ffb74d;
+  --delete-color: #d32f2f;
+  --delete-hover: #b71c1c;
+  --edit-color: #6B4F3A;
+  --edit-hover: #5a3f2a;
+  --progress-bar-border: #ddd;
+  --comment-event-color: #c2185b;
+  --repair-event-color: #00897b;
+  --status-event-color: #6B4F3A;
+}
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  padding-top: 60px;
+  padding-bottom: 500px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Links */
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  left: 0;
+  bottom: -2px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Headings */
+h1 {
+  margin-top: 0px;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: var(--table-bg);
+  transition: background-color 0.3s ease;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+
+th {
+  background-color: var(--table-header-bg);
+  color: var(--accent-color);
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+tr:hover {
+  background-color: var(--table-row-hover);
+}
+
+/* Element block - main content wrapper */
+.element-block {
+  min-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.element-header {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+}
+
+/* Search box */
+.search-box {
+  margin: 0 0 15px 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-box input {
+  padding: 10px;
+  background-color: var(--dropdown-item-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-primary);
+  font-size: 14px;
+  flex: 1;
+  max-width: 300px;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.search-box button {
+  padding: 10px 20px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.search-box button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* Loading and error messages */
+.loading {
+  color: var(--accent-color);
+  font-style: italic;
+  transition: color 0.3s ease;
+}
+
+.error-message {
+  color: var(--error-color);
+  margin-top: 10px;
+  padding: 10px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--error-color);
+  border-radius: 5px;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Delete and edit buttons */
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--delete-color);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.delete-btn:hover {
+  color: var(--delete-hover);
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--edit-color);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  transition: color 0.3s ease;
+  margin-right: 5px;
+}
+
+.edit-btn:hover {
+  color: var(--edit-hover);
+}
