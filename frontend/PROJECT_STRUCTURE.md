@@ -2,10 +2,11 @@
 
 ## Technology Stack
 
-- **Framework**: React 18
-- **Build Tool**: Vite
-- **Routing**: React Router v6
-- **Charts**: Chart.js + React-Chartjs-2 + custom canvas charts
+- **Framework**: React 19.2.0 (latest)
+- **Build Tool**: Vite 7.2.4 (latest)
+- **Routing**: React Router v7.9.6 (latest)
+- **Charts**: Chart.js 4.5.1 + React-Chartjs-2 5.3.1 + custom canvas charts
+- **Date Utilities**: date-fns 4.1.0 (latest)
 - **WebSocket**: Native WebSocket API
 - **State Management**: React Context API
 - **Styling**: CSS with CSS Variables for theming
